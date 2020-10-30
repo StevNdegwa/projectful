@@ -1,0 +1,41 @@
+image: node:12.13.0-alpine
+before_script:
+    - cd functions
+    - npm install
+    - cd ..
+    - npm install
+    - npm i -g firebase-tools
+
+stages:
+    - build
+    - test
+    - deploy
+
+cache:
+    paths:
+       - node_modules/
+    key: "$CI_BUILDS_DIR"
+
+test-app:
+    stage: test
+    only:
+       - master
+    script:
+       - npm run test
+
+build-app:
+    stage: build
+    only:
+       - master
+    script:
+       - npm run build
+    artifacts:
+        paths:
+           - build
+
+deploy-app:
+    stage: deploy
+    only:
+       - master
+    script:
+       - firebase deploy --token $FIREBASE_TOKEN
