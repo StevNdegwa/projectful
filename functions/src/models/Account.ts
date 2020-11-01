@@ -1,15 +1,12 @@
 class Account{
   //Use of parameter properties
-  constructor(public readonly id:string, private _name:string | undefined){}
+  constructor(public readonly id:string, private _name:string){}
   
-  get name(): string | undefined{
+  get name(): string{
     return this._name;
   }
   
-  set name(newName: string | undefined){ //Check if there is an account by that name
-    if(typeof newName === "string"){
-      newName = newName.trim();
-    }
+  set name(newName: string){ //Check if there is an account by that name
     this._name = newName;
   }
 }

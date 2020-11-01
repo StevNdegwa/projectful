@@ -1,28 +1,28 @@
 import Account from "./Account";
 
 class Client{
-  private _name: string | undefined = "";
-  private _email: string | undefined = "";
+  private _name: string = "";
+  private _email: string = "";
   private _account: Account | null = null;
   
-  constructor(readonly id: string, email: string | undefined, name: string | undefined){
+  constructor(readonly id: string, email: string, name: string){
     this._name = name;
     this._email = email;
   }
   
-  get name(): string | undefined{
+  get name(): string {
     return this._name;
   }
   
-  set name(newName: string | undefined){
+  set name(newName: string ){
     this._name = newName;
   }
   
-  get email(): string | undefined{
+  get email(): string {
     return this._email;
   }
   
-  set email(newEmail: string | undefined){
+  set email(newEmail: string){
     this._email = newEmail;
   }
   

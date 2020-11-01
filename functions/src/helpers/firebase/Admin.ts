@@ -12,17 +12,16 @@ class Admin{
   //Manage client app accounts
   static account(){
     let t:Tenants = new Tenants(admin.auth());
-    
     return {
       //Create a new account (tenant)
       create: async function(name:string): Promise<Account>{
         let tenant:admin.auth.Tenant = await t.create(name);
-        return new Account(tenant.tenantId, tenant.displayName);
+        return new Account(tenant.tenantId, tenant.displayName as string);
       },
       //Get an account (Tenant)
       get: async function(id:string): Promise<Account>{
         let tenant:admin.auth.Tenant = await t.get(id);
-        return new Account(tenant.tenantId, tenant.displayName);
+        return new Account(tenant.tenantId, tenant.displayName as string);
       }
     }
   }
@@ -30,8 +29,7 @@ class Admin{
   static client(){
     return {
       //Create a client (user) account
-      create: async function(email:string, password:string, displayName:string): Promise<Client>{
-        
+      create: async function(email:string, password:string, displayName:string): Promise<Client>{ 
         return admin.auth().createUser({
           email,
           emailVerified: false,
@@ -39,24 +37,25 @@ class Admin{
           displayName,
         })
         .then(function(user){
-    
-          return new Client(user.uid, email, displayName)
-          
-        })
+          return new Client(user.uid, email, displayName);
+        });
       },
       //Get a client (user) account
       get: async function(email:string): Promise<Client>{
-        
         return admin.auth().getUserByEmail(email)
           .then(function(user) {
-            
-            return new Client(user.uid, user.email, user.displayName)
-          
-          })
+            return new Client(user.uid, user.email as string, user.displayName as string);
+          });
       },
       //Add the account id to user account
       linkAccount: async function(clientId:string, accountId:string): Promise<void>{
-        return admin.auth().setCustomUserClaims(clientId, {accountId})
+        return admin.auth().setCustomUserClaims(clientId, {accountId});
+      },
+      verificationLink: async function(email:string): Promise<string>{
+        return admin.auth().generateEmailVerificationLink(email)
+        .then(function(link){
+          return link;
+        })
       }
     }
   }

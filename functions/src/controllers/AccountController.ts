@@ -10,7 +10,8 @@ class AccountController{
       let newAccount = request.body;
       
       return Async.waterfall([
-        function(callback:any){ //Create new account (tenant)
+        //Create new account (tenant)
+        function(callback:any){
           return Admin.account().create(newAccount.name)
           .then((account)=>{
             return callback(null, account);
@@ -19,7 +20,8 @@ class AccountController{
             return callback(error);
           })
         },
-        function(account:Account, callback:any){ //Create new client(user) account
+        //Create new client(user) account
+        function(account:Account, callback:any){ 
           let {client} = newAccount;
           
           return Admin.client().create(client.email, client.password, client.name)
@@ -33,34 +35,47 @@ class AccountController{
             return callback(error);
           })
         },
-        function(client:Client, callback:any){ //Add the account id to client account as attribute
+        //Add the account id to client account as attribute
+        function(client:Client, callback:any){
           if(client.account){
             return Admin.client().linkAccount(client.id, client.account.id)
             .then((linked)=>{
-              return callback(null, linked);
+              return callback(null, client);
             })
             .catch((error)=>{
               return callback(error);
             })
           }else{
-            return callback(new Error("Account is null"))
+            return callback(new Error("Account is null"));
           }
         },
-        function(error:any, linked:boolean){//Send response to client
-          if(!!error){
-            return response.json({created:false, message:"An unknown error occured"})
-          }else{
-            if(linked){
-              console.log("Client and account linked");
-              response.json({created:true, message:"Account successfully created"})
-            }
-          }
+        //create an email verification link
+        function(client:Client, callback:any){
+          return Admin.client().verificationLink(client.email as string)
+          .then((link)=>{
+            return callback(null, link);
+          })
+          .catch((error)=>{
+            return callback(error);
+          })
         }
-      ])
-    }catch(error){
-      
+      ],
+      function(error:any, link:string){//Send response to client
+        if(!!error){
+          return response.json({
+            created:false, 
+            message:"An unknown error occured"
+          })
+        }else{
+          return response.json({
+            created:true, 
+            message:"Account successfully created",
+            verificationLink:link
+          })
+        }
+      })
+    }catch(error){      
       return next(error);
-      
     }
   }
 }
