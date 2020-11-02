@@ -1,34 +1,26 @@
 import * as admin from "firebase-admin";
 
 class Tenants{
-  private readonly manager: admin.auth.TenantManager;
-
-  constructor(private readonly adminAuth: admin.auth.Auth){
-    this.manager = this.adminAuth.tenantManager();
-  }
-  
   //Create a new tenant
-  create(name:string): Promise<admin.auth.Tenant>{
-    name = name.trim();
+  static create(name:string): Promise<admin.auth.Tenant>{
     
-    return this.manager.createTenant({
+    return admin.auth().tenantManager().createTenant({
       displayName: name,
       emailSignInConfig: {
         enabled: true,
         passwordRequired: true,
       }
     })
-    .then((createdTenant) => {
+    .then((createdTenant:any) => {
       return createdTenant;
     })
   }
   
   //Get the data of a tenant
-  get(id:string): Promise<admin.auth.Tenant>{
-    id = id.trim();
+  static get(id:string): Promise<admin.auth.Tenant>{
     
-    return this.manager.getTenant(id)
-      .then((tenant) => {
+    return admin.auth().tenantManager().getTenant(id)
+      .then((tenant:any) => {
         return tenant;
       })
   }

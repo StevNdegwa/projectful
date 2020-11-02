@@ -1,4 +1,6 @@
-import Admin from "../helpers/firebase/Admin";
+import AppDB from "../models/AppDB";
+import ClientData from "../models/ClientData";
+import AccountData from "../models/AccountData";
 import Account from "../models/Account";
 import Client from "../models/Client";
 
@@ -12,7 +14,8 @@ class AccountController{
       return Async.waterfall([
         //Create new account (tenant)
         function(callback:any){
-          return Admin.account().create(newAccount.name)
+          
+          return AccountData.configureNewAcc((newAccount.name as string).replace(/\s/g, "-").toLowerCase())
           .then((account)=>{
             return callback(null, account);
           })
@@ -20,15 +23,15 @@ class AccountController{
             return callback(error);
           })
         },
+        
         //Create new client(user) account
         function(account:Account, callback:any){ 
           let {client} = newAccount;
           
-          return Admin.client().create(client.email, client.password, client.name)
+          return ClientData.createUserAccount(client.email, client.password, client.name)
           .then((client)=>{
-            
+            account.name = newAccount.name;
             client.account = account;
-            
             return callback(null, client)
           })
           .catch((error)=>{
@@ -37,44 +40,65 @@ class AccountController{
         },
         //Add the account id to client account as attribute
         function(client:Client, callback:any){
-          if(client.account){
-            return Admin.client().linkAccount(client.id, client.account.id)
-            .then((linked)=>{
-              return callback(null, client);
-            })
-            .catch((error)=>{
-              return callback(error);
-            })
-          }else{
-            return callback(new Error("Account is null"));
-          }
-        },
-        //create an email verification link
-        function(client:Client, callback:any){
-          return Admin.client().verificationLink(client.email as string)
-          .then((link)=>{
-            return callback(null, link);
+          return ClientData.linkAppAccount(client)
+          .then((linked)=>{
+            return callback(null, client);
           })
           .catch((error)=>{
             return callback(error);
           })
         }
       ],
-      function(error:any, link:string){//Send response to client
+      function(error:any, client:Client){//Send response to client
         if(!!error){
           return response.json({
-            created:false, 
+            created:false,
             message:"An unknown error occured"
           })
         }else{
           return response.json({
             created:true, 
-            message:"Account successfully created",
-            verificationLink:link
+            message:`Account for ${client.email} successfully created`
           })
         }
       })
     }catch(error){      
+      return next(error);
+    }
+  }
+  
+  static async activateAccount(request:any, response:any, next:any): Promise<any>{
+    try{
+      
+      let {client} = request.body;
+      
+      //Create a new database
+      return Async.waterfall([
+        function(callback:any){
+          return AppDB.create(client)
+          .then(function(dbName){
+            callback(null, dbName);
+          })
+          .catch(function(error){
+            callback(error)
+          })
+        }
+      ],
+      function(error:any, result:any){
+        if(!!error){
+          return response.json({
+            activated:false,
+            message:"An unknown error occured"
+          })
+        }else{
+          return response.json({
+            activated:true,
+            message:"Account hass been successfully activated",
+            dbName:result
+          })
+        }
+      })
+    }catch(error){
       return next(error);
     }
   }

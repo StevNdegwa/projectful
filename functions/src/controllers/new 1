@@ -1,0 +1,19 @@
+{
+  "client":"sndegwa.n@yahoo.com",
+  "account":{
+    "subscription":"ENTERPRISE",
+    "payment":{
+      "type":"MPESA",
+      "acNumber":"0702297962"
+    },
+    "theme":"LIGHT",
+    "template":"EMPTY",
+    "language":"ENGLISH",
+    "team":[
+      {
+        "name":"Stephen Ndegwa Ng'ang'a",
+        "email":"sndegwa.n@yahoo.com"
+      }
+    ]
+  }
+}

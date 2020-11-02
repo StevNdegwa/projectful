@@ -1,6 +1,6 @@
 class Account{
   //Use of parameter properties
-  constructor(public readonly id:string, private _name:string){}
+  constructor(public readonly id:string, private _name:string = ""){}
   
   get name(): string{
     return this._name;
